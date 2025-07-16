@@ -132,6 +132,6 @@ table_secondary_outcome <- UNITE_2020_corrected |>
   
   
   # Save the workbook
-  saveWorkbook(wb, "Data/processed/summary_tables.csv", overwrite = TRUE)
+  saveWorkbook(wb, "data/processed/summary_tables.xlsx", overwrite = TRUE)
 
 

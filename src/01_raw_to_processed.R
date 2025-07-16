@@ -6,8 +6,8 @@ library(tidyr)
 library(readr)
 
 # Loading data for analysis 
-UNITE_2020_corrected = read.csv("Data/original/UNITE_2020_corrected.csv", header=TRUE)
-UNITE_2021_corrected = read.csv("Data/original/UNITE_2021_corrected.csv", header=TRUE)
+UNITE_2020_corrected = read.csv("data/original/UNITE_2020_corrected.csv", header=TRUE)
+UNITE_2021_corrected = read.csv("data/original/UNITE_2021_corrected.csv", header=TRUE)
 
 # PRISMA diagram - filter 
 UNITE_2020_corrected  = UNITE_2020_corrected |> 
