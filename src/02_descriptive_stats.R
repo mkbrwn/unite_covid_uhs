@@ -6,24 +6,9 @@ library(tidyverse)
 library(gtsummary)
 library(openxlsx)
 
-# Loading data from onedrive -Analysis restricted to 2020 as the 2021 had a 90% prevlance of glucocorticoid use. 
-UNITE_2020_corrected = read.csv("C:/Users/brownmq/OneDrive - University Hospital Southampton NHS Foundation Trust/Projects/Dushi/UNITE COVID data analysis/Data/UNITE_2020_corrected.csv", header= TRUE)
-UNITE_2021_corrected = read.csv("C:/Users/brownmq/OneDrive - University Hospital Southampton NHS Foundation Trust/Projects/Dushi/UNITE COVID data analysis/Data/UNITE_2021_corrected.csv", header= TRUE)
-
-# PRISMA diagram - filter 
-UNITE_2020_corrected  = UNITE_2020_corrected |> 
-  filter( !is.na(ICU_CORTICO_YN))
-
-#Variables for synethesis 
-UNITE_2020_corrected  = UNITE_2020_corrected |> 
-  mutate(INC_BMI_INT = INC_WEIGHT_INT / (INC_HEIGHT_INT/100)^2) |> # BMI
-  mutate(centre = paste(NEW_COUNTRY_ID, "_", NEW_SITE_ID)) |> #ID for centre
-  mutate(patient = paste(NEW_COUNTRY_ID, "_", NEW_SITE_ID, "_", NEW_SUBJECT_ID)) |>  #ID for patient
-  mutate(OUT_HOSP_DURATION_OVERALL_INT = ifelse( is.na(OUT_HOSP_DURATION_INT), 
-                                                 OUT_ICU_DURATION_INT + INC_LOS_PRIOR_ADM_INT, 
-                                                 OUT_HOSP_DURATION_INT)) |> #calculating the overall days in hospital (PreICU +ICU) if a patient died in ICU
-  mutate(COAG_THROMBO_COMPLICATION = ifelse( COAG_THROMBO_NONE_CB == FALSE, TRUE, FALSE)) # Any thromboembolic complication
-        
+# Run 01_raw_to_processed.r to process the data
+source("src/01_raw_to_processed.r") 
+    
 # summary tables using gtsummary based on the Dushi's protocol 
 
 table_characteristics <- UNITE_2020_corrected |>
@@ -147,6 +132,6 @@ table_secondary_outcome <- UNITE_2020_corrected |>
   
   
   # Save the workbook
-  saveWorkbook(wb, "summary_tables.xlsx", overwrite = TRUE)
+  saveWorkbook(wb, "Data/processed/summary_tables.csv", overwrite = TRUE)
 
 
