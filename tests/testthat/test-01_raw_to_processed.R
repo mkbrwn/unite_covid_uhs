@@ -21,3 +21,4 @@ test_that("Corticosteroid and outcome (60 day mortality) var is not NA", {
 test_that("Corticosteroids has 2 levels", {
   expect_equal(length(unique(UNITE_2020_corrected$ICU_CORTICO_YN)), 2)
   })
+ 

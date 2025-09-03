@@ -21,10 +21,11 @@ some R code
 ## Tasks to do
 
 1. Implement test to ensure quality of analysis
-2. Explore missingness 
-3. Await treatment variables from Kat (Cambridge)
+2. Asscociation of steroids with mortality - CRP as continous and categorical variable with adjustement for steroid use.
 
 ## Discussion for Matt 
 
 1. Help with application of tests.
-2. Shape of analysis - MICE and GLM - 'mixgb' package for PPM  with non linear relationships and intearactions 
+2. Assumed that steroid has a repsonce - steroids associated with increased mortality, steroid not associated with increased IPPV, ? restrict analysis to steroids. 
+3. Regression analysis - difficult to know what Dushi is actually wanting. 
+

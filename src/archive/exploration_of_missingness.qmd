@@ -24,12 +24,10 @@ library(here) #allow relative paths within Quatro
 ```{r}
 #| label: Run processed data
 #| include: false
-
-# set wd within quatro
-getwd()
-setwd(here::here())
+#| 
 # Run 01_raw_to_processed.r to process the data
-source("src/01_raw_to_processed.r") 
+source("src/01_raw_to_processed.R") 
+
 ```
 
 The Cambridge analysis identified that length of ventilation was related to the center (e.g ICU) and used predictive mean matching for muiltiple imputation (n=5).
@@ -39,10 +37,7 @@ The Cambridge analysis identified that length of ventilation was related to the 
 #| label: Overall description of missingness
 
 gg_miss_var(UNITE_2020_corrected, show_pct = TRUE, facet = ICU_CORTICO_YN)
-```
-
 vis_miss(UNITE_2020_corrected)
-
 gg_miss_fct(UNITE_2020_corrected, NEW_SITE_ID) 
 gg_miss_fct(UNITE_2020_corrected, NEW_COUNTRY_ID)
 

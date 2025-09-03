@@ -12,7 +12,7 @@ source("src/01_raw_to_processed.r")
 # summary tables using gtsummary based on the Dushi's protocol 
 
 table_characteristics <- UNITE_2020_corrected |>
-  tbl_summary( include = c( INC_AGE_INT, INC_SEX_RAD, INC_HEIGHT_INT, INC_WEIGHT_INT, INC_BMI_INT), 
+  tbl_summary( include = c( INC_AGE_INT, INC_SEX_RAD, INC_BMI_INT), 
                by  = ICU_CORTICO_YN) |> 
   add_n() |> 
   add_p(pvalue_fun = ~style_sigfig(.,digits =2), test = all_categorical() ~ 'fisher.test') |> 
@@ -22,7 +22,7 @@ table_characteristics <- UNITE_2020_corrected |>
   bold_labels()
 
 table_comorbidity <- UNITE_2020_corrected |>
-  tbl_summary( include = c( INC_CARDIAC_DISEASE_YN:INC_HIV_YN
+  tbl_summary( include = c( INC_CARDIAC_DISEASE_YN:INC_HIV_YN, comorbidity_score
     ), 
                by  = ICU_CORTICO_YN) |> 
   add_n() |> 
@@ -56,7 +56,7 @@ table_icu_meds <- UNITE_2020_corrected |>
   bold_labels()
 
 table_corticosteroids <- UNITE_2020_corrected |>
-  tbl_summary( include = c( ICU_CORTICO_YN:ICU_CORTICO_INDICATION_RAD, INF_AT_ADMISSION_YN, INF_DURING_ICU_YN, INF_SEVERITY
+  tbl_summary( include = c( ICU_CORTICO_YN:ICU_CORTICO_INDICATION_RAD, INF_AT_ADMISSION_YN, INF_DURING_ICU_YN,
   ), 
   by  = ICU_CORTICO_YN) |> 
   add_n() |> 
@@ -78,7 +78,7 @@ table_duringICUaddmission <- UNITE_2020_corrected |>
   bold_labels()
 
 table_primary_outcome <- UNITE_2020_corrected |>
-  tbl_summary( include = c( OUTCOME_LD, OUT_ICU_DURATION_INT, OUT_HOSP_DURATION_OVERALL_INT ), 
+  tbl_summary( include = c( OUTCOME_LD, OUT_DEAD_DURING_ICU_YN, OUT_ICU_DURATION_INT, OUT_HOSP_DURATION_OVERALL_INT ), 
                by  = ICU_CORTICO_YN) |> 
   add_n() |> 
   add_p(pvalue_fun = ~style_sigfig(.,digits =2), test = all_categorical() ~ 'fisher.test') |> 
@@ -133,5 +133,8 @@ table_secondary_outcome <- UNITE_2020_corrected |>
   
   # Save the workbook
   saveWorkbook(wb, "data/processed/summary_tables.xlsx", overwrite = TRUE)
+
+
+
 
 
