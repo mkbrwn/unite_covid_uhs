@@ -56,7 +56,7 @@ table_icu_meds <- UNITE_2020_corrected |>
   bold_labels()
 
 table_corticosteroids <- UNITE_2020_corrected |>
-  tbl_summary( include = c( ICU_CORTICO_YN:ICU_CORTICO_INDICATION_RAD, INF_AT_ADMISSION_YN, INF_DURING_ICU_YN,
+  tbl_summary( include = c( ICU_CORTICO_DURATION_INT:ICU_CORTICO_INDICATION_RAD,ICU_CORTICO_ICU_INITIATION_AT_ADMISSION_YN, INF_AT_ADMISSION_YN, INF_DURING_ICU_YN,
   ), 
   by  = ICU_CORTICO_YN) |> 
   add_n() |> 
@@ -65,6 +65,13 @@ table_corticosteroids <- UNITE_2020_corrected |>
   add_overall() |>
   modify_header(label = "**Variable**") |>
   bold_labels()
+
+  print( UNITE_2020_corrected |> filter(ICU_CORTICO_DURATION_INT != 0 ) |> 
+  tbl_summary( include = c( ICU_CORTICO_DURATION_INT), 
+  by  = ICU_CORTICO_YN) |> 
+  add_n() 
+  )
+
 
 # PCT during ICU Admission was not collected 
 table_duringICUaddmission <- UNITE_2020_corrected |>
@@ -77,8 +84,11 @@ table_duringICUaddmission <- UNITE_2020_corrected |>
   modify_header(label = "**Variable**") |>
   bold_labels()
 
+
+
+
 table_primary_outcome <- UNITE_2020_corrected |>
-  tbl_summary( include = c( OUTCOME_LD, OUT_DEAD_DURING_ICU_YN, OUT_ICU_DURATION_INT, OUT_HOSP_DURATION_OVERALL_INT ), 
+  tbl_summary( include = c( OUTCOME_LD, OUT_DEAD_DURING_ICU_YN, OUT_ICU_DURATION_INT, OUT_HOSP_DURATION_OVERALL_INT, ), 
                by  = ICU_CORTICO_YN) |> 
   add_n() |> 
   add_p(pvalue_fun = ~style_sigfig(.,digits =2), test = all_categorical() ~ 'fisher.test') |> 
@@ -88,7 +98,7 @@ table_primary_outcome <- UNITE_2020_corrected |>
   bold_labels()
  
 table_secondary_outcome <- UNITE_2020_corrected |>
-  tbl_summary( include = c( ICU_RRT_DIAL_YN, ICU_INOTROPES_YN, RESP_INTUBATED_YN, RESP_NI_VENT_YN, COAG_THROMBO_COMPLICATION ), 
+  tbl_summary( include = c( ICU_RRT_DIAL_YN, ICU_INOTROPES_YN, RESP_INTUBATED_YN, RESP_NI_VENT_YN, COAG_THROMBO_COMPLICATION, ventilation_severity), 
                by  = ICU_CORTICO_YN) |> 
   add_n() |> 
   add_p(pvalue_fun = ~style_sigfig(.,digits =2), test = all_categorical() ~ 'fisher.test') |> 
@@ -137,4 +147,9 @@ table_secondary_outcome <- UNITE_2020_corrected |>
 
 
 
-
+#calculateing the proportion of patients who were intubated prior to receiving corticosteroids in ICU
+#test = UNITE_2020_corrected |> 
+#filter(ICU_CORTICO_YN == 1) |> 
+#mutate( cortico_intubation = ifelse( RESP_INTUB_DAYS_AFT_ADM_INT <= ICU_CORTICO_INTERV_INT
+#, 1,0)) |> 
+#tbl_summary( include = c( cortico_intubation))

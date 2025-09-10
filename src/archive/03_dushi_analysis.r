@@ -109,7 +109,7 @@ table_crp_cat_secondary_outcome <- UNITE_2020_corrected |>
 
 ######  With adjustment for steroid use.
 regression_CRP_adjsteroid = glm(OUTCOME_LD_DEATH ~ ICU_CRP_INT + ICU_CORTICO_YN, data =  UNITE_2020_corrected,  family = binomial)
- summary(simple_regression_CRP_adjsteroid)
+ summary(regression_CRP_adjsteroid)
 
 regression_CRP_cat_adjsteroid = glm(OUTCOME_LD_DEATH ~ ICU_CRP_RAD + ICU_CORTICO_YN, data =  UNITE_2020_corrected,  family = binomial)
  summary(regression_CRP_cat_adjsteroid)

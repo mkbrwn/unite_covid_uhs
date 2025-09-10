@@ -87,8 +87,10 @@ model_imputed = with(data=UNITE_2020_corrected_mice_minimum,
 imputation_glm = tbl_regression(model_imputed, exponentiate = TRUE)
 imputation_glm <- tibble::as_tibble(as.data.frame(imputation_glm))
 
+summary(D1(model_imputed ))
+
 model_imputed = with(data=UNITE_2020_corrected_mice_minimum,
- expr=glm(OUTCOME_LD_DEATH ~ ICU_CORTICO_YN + ICU_CRP_INT,  family = binomial))
+ expr=glm(OUTCOME_LD_DEATH ~ ICU_CORTICO_YN*ICU_CRP_INT,  family = binomial))
 imputation_glm_crp = tbl_regression(model_imputed, exponentiate = TRUE)
 imputation_glm_crp <- tibble::as_tibble(as.data.frame(imputation_glm_crp))
 
@@ -96,8 +98,6 @@ model_imputed = with(data=UNITE_2020_corrected_mice_minimum,
  expr=glm(OUTCOME_LD_DEATH ~ ICU_CORTICO_YN + ICU_CRP_RAD,  family = binomial))
 imputation_glm_crp_cat = tbl_regression(model_imputed, exponentiate = TRUE)
 imputation_glm_crp_cat <- tibble::as_tibble(as.data.frame(imputation_glm_crp_cat))
-
-
 
 # imputation diagnostics
 densityplot(UNITE_2020_corrected_mice_minimum)

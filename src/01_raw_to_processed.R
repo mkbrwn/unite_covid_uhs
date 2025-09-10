@@ -27,6 +27,20 @@ UNITE_2020_corrected  = UNITE_2020_corrected |>
   mutate(COAG_THROMBO_COMPLICATION = ifelse( COAG_THROMBO_NONE_CB == FALSE, TRUE, FALSE)) # Any thromboembolic complication
 
 
+# Severity of respiratory failure denoted by the requirement for respiratory support.
+
+    # replacing NA with FALSE for ventilation data
+    UNITE_2020_corrected <- UNITE_2020_corrected %>% replace_na(list(RESP_PRONE_YN = FALSE, RESP_ECMO_YN = FALSE, RESP_NEUROM_BLOC_YN = FALSE, ICU_ANTIMALARIAL_YN=FALSE,
+                                                ICU_ANTIVIRALS_YN = FALSE))
+
+
+    #ventilation_severity - score the ventilation severity using different levels of ventilatory support
+    UNITE_2020_corrected <- UNITE_2020_corrected %>% mutate(ventilation_severity = case_when(RESP_ECMO_YN == TRUE ~3, RESP_PRONE_YN==TRUE ~3,
+                                                                        RESP_NEUROM_BLOC_YN ==TRUE & RESP_PRONE_YN ==FALSE ~2,
+                                                                        RESP_PRONE_YN==FALSE & RESP_NEUROM_BLOC_YN == FALSE ~1))
+
+
+
 ######################################################### restrict to the variables of interest ###############################################################
 UNITE_2020_corrected  = UNITE_2020_corrected |> 
   select(
@@ -55,6 +69,8 @@ UNITE_2020_corrected  = UNITE_2020_corrected |>
   "INC_IMMUNOSUPPR_YN",
   "INC_HIV_YN",
   # Pre-ICU admission
+  "ICU_ADM_DIAG_RAD",
+  "INC_LOS_PRIOR_ADM_INT",
   "ICU_RESP_SUPPORT_YN",
   "ICU_SUPP_TYPE_RAD",
   "ICU_WHITE_CELL_INT", 
@@ -64,6 +80,7 @@ UNITE_2020_corrected  = UNITE_2020_corrected |>
   "ICU_CRP_INT",
   "ICU_PRO_CALCIT_DEC",
   "ICU_PLATELETS_INT",
+  "ICU_LYMPH_DEC",
   # ICU medications
   "ICU_ANTIVIRALS_YN",
   "INF_ANTIBIO_YN",
@@ -86,21 +103,32 @@ UNITE_2020_corrected  = UNITE_2020_corrected |>
   "ICU_OTHER_ANTIVIRALS_RAD", # contains Convalescent plasma/Tocilizumab / Anakinra / Interferon alpha / Interferon beta
   "ICU_ANTIMALARIAL_YN",
   "ICU_CLIN_TRIAL_YN", 
+  # Respiratory support
+  "RESP_PRONE_YN",
+  "RESP_ECMO_YN",
+  "RESP_NEUROM_BLOC_YN",
+  "RESP_INTUBATED_YN",
+  "RESP_INTUB_DAYS_AFT_ADM_INT", # DAYS FROM ICU ADMISSION TO INTUBATION
+  "RESP_DURATION_INV_VENT_INT", # DURATION OF VENTILATION
   # Outcomes
   "OUTCOME_LD",
   "OUT_ICU_DURATION_INT",
+  "OUT_HOSP_DURATION_INT",
   "OUT_HOSP_DURATION_OVERALL_INT",
   "OUT_DEAD_DURING_ICU_YN",
   # Secondary outcomes
   "ICU_RRT_DIAL_YN",
   "ICU_INOTROPES_YN",
-  "RESP_INTUBATED_YN",
+  "RESP_INV_VENT_YN",
   "RESP_NI_VENT_YN",
-  "COAG_THROMBO_COMPLICATION"
+  "COAG_THROMBO_COMPLICATION",
+  "ventilation_severity"
 )
 
 ######################################################## Ensure format of data is correct ########################################################
 
+
+              ###########glucocortioid metrics ###########
 # Convert categorical variables of the indication of steriods to factors according to the CRF
 UNITE_2020_corrected <- UNITE_2020_corrected |>
   mutate(ICU_CORTICO_INDICATION_RAD = case_when(
@@ -122,6 +150,20 @@ UNITE_2020_corrected <- UNITE_2020_corrected |>
     ICU_CORTICO_INDICATION_OTHER = ICU_CORTICO_INDICATION_RAD == "Other"
   )
 
+# Indicator of those who started steroids prior to ICU admission
+UNITE_2020_corrected <- UNITE_2020_corrected |>
+  mutate( 
+    ICU_CORTICO_ICU_INITIATION_AT_ADMISSION_YN = ifelse(ICU_CORTICO_INTERV_INT == 0, 1, 0), #Coritcoids started at admission
+    ICU_CORTICO_ICU_INITIATION_PRIOR_ADMISSION_ICU_YN = ifelse(ICU_CORTICO_INTERV_INT <= INC_LOS_PRIOR_ADM_INT, 1, 0), # corticoids started prior to icu
+    ICU_CORTICO_ICU_INITIATION_DURING_ADMISSION_ICU_YN = ifelse( INC_LOS_PRIOR_ADM_INT <= ICU_CORTICO_INTERV_INT, 1, 0) # corticoids started during icu
+  )
+
+# how many do not have admission to ICU and admission to corticoid information and receive steroids
+#table(ifelse(is.na(UNITE_2020_corrected$ICU_CORTICO_ICU_INITIATION_AT_ADMISSION_YN) &
+#     is.na(UNITE_2020_corrected$ICU_CORTICO_ICU_INITIATION_AT_ADMISSION_ICU_YN) &
+#      UNITE_2020_corrected$ICU_CORTICO_YN == TRUE, TRUE, FALSE))
+
+##################################################################
 # Convert OUTCOME_LD to multiple indicator (dummy) variables
 UNITE_2020_corrected <- UNITE_2020_corrected |>
   mutate(
@@ -149,13 +191,30 @@ write.csv(UNITE_2020_corrected, "data/processed/UNITE_2020_corrected_processed.c
  UNITE_2020_corrected <- UNITE_2020_corrected |> 
   mutate(ICU_SUPP_TYPE_RAD = ifelse( ICU_RESP_SUPPORT_YN  == FALSE, "No respiratory support prior to ICU", ICU_SUPP_TYPE_RAD))
 
+# Organ support outcome - assumed to be FALSE if NA
+ UNITE_2020_corrected <- UNITE_2020_corrected |> 
+  mutate(
+    RESP_NI_VENT_YN = ifelse(is.na(RESP_NI_VENT_YN), FALSE, RESP_NI_VENT_YN),
+    RESP_INTUBATED_YN  = ifelse(is.na(RESP_INTUBATED_YN), FALSE, RESP_INTUBATED_YN),
+    ICU_INOTROPES_YN = ifelse(is.na(ICU_INOTROPES_YN), FALSE, ICU_INOTROPES_YN),
+    ICU_RRT_DIAL_YN = ifelse(is.na(ICU_RRT_DIAL_YN), FALSE, ICU_RRT_DIAL_YN)
+  )
+
+
 ####################################### Creation of new variables #######################################
 
-# Stratification based on admission CRP 
+# Stratification based on admission CRP  by 100
  UNITE_2020_corrected =  UNITE_2020_corrected |> 
     mutate(ICU_CRP_RAD = cut(ICU_CRP_INT,
         breaks = c( 0 ,100, 200, 300, Inf ),
         labels = c( "0-100", "101-200", "201-300", "≥300" )
+    ))
+
+# Stratification based on admission CRP  by 50
+ UNITE_2020_corrected =  UNITE_2020_corrected |> 
+    mutate(ICU_CRP_RAD50 = cut(ICU_CRP_INT,
+        breaks = c( 0 ,50, 100, 150, 200, 250, 300, Inf ),
+        labels = c( "0-50", "51-100", "101-150", "151-200", "201-250", "251-300", "≥301" )
     ))
 
 # comorbidity score - replace NA with FALSE to allow for scoring (Taken from cambridge)
@@ -177,3 +236,8 @@ UNITE_2020_corrected<- UNITE_2020_corrected %>% mutate(cardiac_d = if_else(INC_C
 
 # compute an additive comorbidity score where each comorbidity has equal weight:
 UNITE_2020_corrected<- UNITE_2020_corrected %>% mutate(comorbidity_score = cardiac_d+liver_d+neuro_d+diabetes_d+kidney_d+htn_d+asthma_d+resp_d+immunosup_d+hiv_d)
+
+# neutrophil to lymphocyte ratio
+
+UNITE_2020_corrected <- UNITE_2020_corrected %>%
+  mutate(neutrophil_lymphocyte_ratio = ifelse(ICU_LYMPH_DEC == 0, NA, ICU_NEUTRO_INT / ICU_LYMPH_DEC))
