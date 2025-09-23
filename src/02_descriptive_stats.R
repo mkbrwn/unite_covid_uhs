@@ -66,11 +66,11 @@ table_corticosteroids <- UNITE_2020_corrected |>
   modify_header(label = "**Variable**") |>
   bold_labels()
 
-  print( UNITE_2020_corrected |> filter(ICU_CORTICO_DURATION_INT != 0 ) |> 
+   UNITE_2020_corrected |> filter(ICU_CORTICO_DURATION_INT != 0 ) |> 
   tbl_summary( include = c( ICU_CORTICO_DURATION_INT), 
   by  = ICU_CORTICO_YN) |> 
   add_n() 
-  )
+
 
 
 # PCT during ICU Admission was not collected 

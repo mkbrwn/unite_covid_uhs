@@ -49,7 +49,7 @@ UNITE_2020_corrected  = UNITE_2020_corrected |>
   "NEW_PATIENT_ID",
   "NEW_COUNTRY_ID",
   "NEW_SITE_ID",              
-  "NEW_SUBJECT_ID", 
+  "NEW_SUBJECT_ID",
   # Demographics
   "INC_AGE_INT",
   "INC_SEX_RAD",
@@ -102,7 +102,7 @@ UNITE_2020_corrected  = UNITE_2020_corrected |>
   "ICU_ANTIVIRALS_RAD", # contains Lopinavir/Ritonavir /Remdesivir etc. 
   "ICU_OTHER_ANTIVIRALS_RAD", # contains Convalescent plasma/Tocilizumab / Anakinra / Interferon alpha / Interferon beta
   "ICU_ANTIMALARIAL_YN",
-  "ICU_CLIN_TRIAL_YN", 
+  "ICU_CLIN_TRIAL_YN",
   # Respiratory support
   "RESP_PRONE_YN",
   "RESP_ECMO_YN",
@@ -177,6 +177,15 @@ UNITE_2020_corrected <- UNITE_2020_corrected |>
 UNITE_2020_corrected<- UNITE_2020_corrected %>% replace_na(list(RESP_PRONE_YN = FALSE, RESP_ECMO_YN = FALSE, RESP_NEUROM_BLOC_YN = FALSE, ICU_ANTIMALARIAL_YN=FALSE,
                                                 ICU_ANTIVIRALS_YN = FALSE))
 
+
+# converting character variables to factors
+UNITE_2020_corrected <- UNITE_2020_corrected |>
+  mutate(
+    INC_SEX_RAD = as.factor(INC_SEX_RAD),
+    INC_DIABETES1_YN = ifelse(INC_DIABETES_YN =="Type II diabetes", TRUE, FALSE),
+    INC_DIABETES2_YN = ifelse(INC_DIABETES_YN =="Type I diabetes", TRUE, FALSE)
+
+  )
 
 ################################################################### Variables which are NA not allowed to be #################################################################
 
