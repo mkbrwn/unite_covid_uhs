@@ -33,7 +33,11 @@ tbl
 
 #model with interaction of CRP 
 
-model_interaction_crplinear <- glmer(OUT_DEAD_DURING_ICU_YN ~ ICU_CORTICO_YN * ICU_CRP_INT + (1|NEW_CENTRE_ID), data = UNITE_2020_corrected, family = binomial)
+  # rescale crp into 10 mg/L bins
+  UNITE_2020_test <- UNITE_2020_corrected %>%
+    mutate(ICU_CRP_INT10 = ICU_CRP_INT/100)
+
+model_interaction_crplinear <- glmer(OUT_DEAD_DURING_ICU_YN ~ ICU_CORTICO_YN * ICU_CRP_INT10 + (1|NEW_CENTRE_ID), data = UNITE_2020_test, family = binomial)
 print(summary(model_interaction_crplinear))
 
 tbl <- tbl_regression(model_interaction_crplinear,    
@@ -42,6 +46,14 @@ tbl <- tbl_regression(model_interaction_crplinear,
 )
 tbl
 
+model_interaction_crplinear <- glmer(OUT_DEAD_DURING_ICU_YN ~ ICU_CORTICO_YN * ICU_CRP_RAD + (1|NEW_CENTRE_ID), data = UNITE_2020_corrected, family = binomial)
+print(summary(model_interaction_crplinear))
+
+tbl <- tbl_regression(model_interaction_crplinear,    
+  conf.int     = TRUE,
+  exponentiate = TRUE
+)
+tbl
 
 # It's definitly not linear 
 

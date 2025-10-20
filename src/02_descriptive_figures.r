@@ -50,7 +50,7 @@ rename(
 
 # correlation matrix of lab values as graph
  ggcorrplot(cor(UNITE_2020_labs, use = "pairwise.complete.obs"), lab = TRUE, type = "lower")
-ggsave( "UNITE COVID data analysis/figures/correlation_matrix.pdf")
+ggsave( "figures/correlation_matrix.png",dpi = 900, bg = "white")
 
 ############## Now with multiple imputation ##############
 library(mice)
@@ -129,7 +129,7 @@ summary_stats <- UNITE_2020_steroid_timing_long %>%
   mutate(event = factor(event, levels = levels(UNITE_2020_steroid_timing_long$event)))
 
 # 2. Build the ridgeline plot + annotate
-ggplot(UNITE_2020_steroid_timing_long, aes(x = days, y = event, fill = event,)) +
+x = ggplot(UNITE_2020_steroid_timing_long, aes(x = days, y = event, fill = event,)) +
   geom_density_ridges(
     scale            = 1.2,
     rel_min_height   = 0.01,
@@ -163,10 +163,9 @@ ggplot(UNITE_2020_steroid_timing_long, aes(x = days, y = event, fill = event,)) 
         label = sprintf("%d, %.0f days (%s)", n, median, interquartiles)
       ),
       hjust = 0,
-      size  = 3
+      size  = 6
     ) +
   labs(
-    title    = "Clinical events timeline for patients receiving glucocorticoid treatment",
     x        = "Days",
     y        = NULL,
     fill     = "Event"
@@ -176,14 +175,16 @@ ggplot(UNITE_2020_steroid_timing_long, aes(x = days, y = event, fill = event,)) 
     breaks = c(-25, 0, 25, 50, 75),
     labels = c("-25", "ICU admission", "25", "50", "75")
   ) +
-  theme_ridges(font_size = 14, grid = TRUE) +
+  theme_ridges(font_size = 20, grid = TRUE) +
   theme(
-    plot.title     = element_text(face = "bold", size = 18, hjust = 0.5),
-    plot.subtitle  = element_text(size = 14, hjust = 0.5),
-  axis.title.x   = element_text(size = 14, hjust = 0.5),
-    axis.text.y    = element_text(size = 12),
+    plot.subtitle  = element_text(size = 20, hjust = 0.5),
+    axis.title.x   = element_text(size = 20, hjust = 0.5),
+    axis.text.y    = element_text(size = 20),
+    axis.text.x    = element_text(size = 20),
     legend.position = "none"
   ) +
   scale_fill_viridis_d(option = "C", begin = 0.2, end = 0.8)
 
-ggsave("UNITE COVID data analysis/figures/UNITE_2020_steroid_timing.png", plot = last_plot() , width = 10, height = 6)
+# Save the plot
+ggsave("figures/UNITE_2020_steroid_timing.png", width = 16, height = 10, dpi = 900, bg = "white")
+print("figure saved")

@@ -33,8 +33,8 @@ table_comorbidity <- UNITE_2020_corrected |>
   bold_labels()
 
 table_preICUaddmission <- UNITE_2020_corrected |>
-  tbl_summary( include = c( ICU_RESP_SUPPORT_YN, ICU_SUPP_TYPE_RAD, ICU_WHITE_CELL_INT:ICU_FERRITINE_INT, ICU_DIMERS_INT, ICU_PLATELETS_INT
-  ), 
+  tbl_summary( include = c( ICU_RESP_SUPPORT_YN, ICU_SUPP_TYPE_RAD, ICU_WHITE_CELL_INT:ICU_FERRITINE_INT, ICU_PRO_CALCIT_DEC, ICU_DIMERS_INT, ICU_PLATELETS_INT, ICU_LYMPH_DEC, neutrophil_lymphocyte_ratio, ICU_CRP_INT
+    ), 
   by  = ICU_CORTICO_YN) |> 
   add_n() |> 
   add_p(pvalue_fun = ~style_sigfig(.,digits =2), test = all_categorical() ~ 'fisher.test') |> 
@@ -75,7 +75,7 @@ table_corticosteroids <- UNITE_2020_corrected |>
 
 # PCT during ICU Admission was not collected 
 table_duringICUaddmission <- UNITE_2020_corrected |>
-  tbl_summary( include = c( ICU_SUP_WHITE_CELL_INT:ICU_SUP_FERRITINE_DEC, COAG_DIMERS_INT, COAG_PLATELETS_INT ), 
+  tbl_summary( include = c( ICU_SUP_WHITE_CELL_INT:ICU_SUP_FERRITINE_DEC, COAG_DIMERS_INT, COAG_PLATELETS_INT,  ), 
   by  = ICU_CORTICO_YN) |> 
   add_n() |> 
   add_p(pvalue_fun = ~style_sigfig(.,digits =2), test = all_categorical() ~ 'fisher.test') |> 

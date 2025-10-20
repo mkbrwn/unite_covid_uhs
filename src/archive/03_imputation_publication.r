@@ -21,6 +21,7 @@ library(naniar) #visualisation of missingness
 library(caret) # For colinearity detection
 library(mixgb) # mi with xgboost
 library(MASS) # backwards step AIC 
+library(caret)
 
 # make sure select is used with dplyr by default 
 
@@ -117,10 +118,21 @@ missing_preimputation  =  gg_miss_fct(UNITE_2020_corrected_preimputation,NEW_SIT
 ggsave("figures/missing_preimputation.png", plot = missing_preimputation , width = 8, height = 6, dpi = 300, bg = "white")
 
 
+############################################## test and study split ##############################################
+
+# Create a test and study split
+library(caret)
+set.seed(123) # For reproducibility
+train_indices <- createDataPartition(UNITE_2020_corrected_preimputation$OUT_DEAD_DURING_ICU_YN, p = 0.8, list = FALSE)
+train_data <- UNITE_2020_corrected_preimputation[train_indices, ]
+test_data <- UNITE_2020_corrected_preimputation[-train_indices, ]
+
 ##############################################imputation##############################################
 
-UNITE_2020_corrected_imputation = futuremice(UNITE_2020_corrected_preimputation, m=5, n.cores=8 ) 
-print("multiple imputation completed")
+train_data_imputation = futuremice(train_data, m=5, n.cores=8 ) 
+print("multiple imputation completed train data")
+test_data_imputation = futuremice(test_data, m=5, n.cores=8 ) 
+print("multiple imputation completed test data")
 
 # synthesis of vriables post imputation
 
@@ -136,16 +148,16 @@ print("multiple imputation completed")
  
 # Plot convergence for all imputed variables
 pdf("figures/convergence_imputation.pdf", width = 10, height = 8)
-plot(UNITE_2020_corrected_imputation) # convergence looks adequate 
+plot(train_data_imputation) # convergence looks adequate 
 dev.off()
 
 #bwplot and save
 png("figures/bwplot_imputation.png", width = 8, height = 6, units = "in", res = 300, bg = "white")
-bwplot(UNITE_2020_corrected_imputation)
+bwplot(train_data_imputation)
 dev.off()
 
 pdf("figures/densityplot_imputation.pdf", width = 8, height = 6, units = "in", res = 300, bg = "white")
-densityplot_imputation = densityplot(UNITE_2020_corrected_imputation)
+densityplot_imputation = densityplot(train_data_imputation)
 dev.off()
 
 print("Diagnostic plots of multiple imputation completed")
