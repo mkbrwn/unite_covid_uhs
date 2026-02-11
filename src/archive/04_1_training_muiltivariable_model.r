@@ -66,8 +66,8 @@ scaled_list <- lapply(1:train_data_imputation$m, function(i) {
                                 !grepl("^wave$", numeric_cols)]
   
   # Scale only the identified columns and convert to vectors
-  data %>%
-    mutate(across(all_of(cols_to_scale), ~ as.vector(scale(.))))
+  #data %>%
+  # mutate(across(all_of(cols_to_scale), ~ as.vector(scale(.))))
 })
 
 # Step 2: Convert back to mids object
@@ -83,12 +83,18 @@ formula <- OUT_DEAD_DURING_ICU_YN ~ NEW_SITE_ID + INC_LOS_PRIOR_ADM_INT + INC_CA
              ICU_PNEUMOTHORAX_YN + ICU_ATELECTASIS_YN + ICU_DELIRIUM_YN  + ICU_OBSTRUCTION_YN + ICU_CORTICO_YN + ICU_SEDAT_DURATION_INT +
              + ICU_RRT_DIAL_YN + ICU_INOTROPES_YN + ICU_TRACHEOS_YN + RESP_INTUBATED_YN + RESP_HFNC_YN + RESP_INV_VENT_YN + RESP_DURATION_INV_VENT_INT + 
              RESP_ECMO_YN + RESP_PRONE_YN + INF_DURING_ICU_YN + INC_DIABETES1_YN +
-             + neutrophil_lymphocyte_ratio + age_group 
+             + neutrophil_lymphocyte_ratio + age_group + ICU_CRP_INT
 
               # Fit the model
             train_data_imputed_scaled_muiltivariable = glm(formula, data = complete(train_data_imputation_scaled))
             summary(train_data_imputed_scaled_muiltivariable)
-            tbl_regression(train_data_imputed_scaled_muiltivariable, exponentiate = TRUE)
+            tbl_regression(train_data_imputed_scaled_muiltivariable, exponentiate = TRUE) %>% print()
+            
+            #save table tbl_regression as csv
+            muiltivariable_model_table = tbl_regression(train_data_imputed_scaled_muiltivariable, exponentiate = TRUE)
+            muiltivariable_model_table %>%
+              as_tibble() %>%
+              write.csv("Figures/model_assessment/muiltivariable_model_table.csv", row.names = FALSE)
 
 print("Imputed muiltivariable model complete")
 
@@ -98,7 +104,7 @@ BrierScore(train_data_imputed_scaled_muiltivariable) # 0.1551556
 
 
 # assess model performance 
-#model_performance(train_data_imputed_scaled_muiltivariable)
+model_performance(train_data_imputed_scaled_muiltivariable)
 
 #  AIC    |   AICc |    BIC |    R2 |  RMSE | Sigma
 #------------------------------------------------

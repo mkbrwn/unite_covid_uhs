@@ -3,6 +3,8 @@
 # Load required libraries
 library(tidyverse)
 library(readr)
+library(gtsummary)
+
 # Loading data for analysis 
 UNITE_2020_corrected = read.csv("data/original/UNITE_2020_corrected.csv", header=TRUE)
 UNITE_2020_corrected = UNITE_2020_corrected %>% mutate(wave = 1)
@@ -20,6 +22,8 @@ UNITE_2020_corrected = UNITE_2020_corrected %>%
       NEW_SITE_ID + max, 
       NEW_SITE_ID)
       )
+
+
 
 
 ######################################################## Filter dataset: PRISMA diagram #############################################################################
@@ -50,91 +54,6 @@ UNITE_2020_corrected  = UNITE_2020_corrected |>
                                                                         RESP_NEUROM_BLOC_YN ==TRUE & RESP_PRONE_YN ==FALSE ~2,
                                                                         RESP_PRONE_YN==FALSE & RESP_NEUROM_BLOC_YN == FALSE ~1))
 
-
-
-######################################################### restrict to the variables of interest ###############################################################
-UNITE_2020_corrected  = UNITE_2020_corrected |> 
-  select(
-  #ID 
-  "NEW_CENTRE_ID",
-  "NEW_PATIENT_ID",
-  "NEW_COUNTRY_ID",
-  "NEW_SITE_ID",              
-  "NEW_SUBJECT_ID",
-  # Demographics
-  "INC_AGE_INT",
-  "INC_SEX_RAD",
-  "INC_BMI_INT",
-  # Grouping
-  "ICU_CORTICO_YN",
-  # Comorbidities (range)
-  "INC_CARDIAC_DISEASE_YN",
-  "INC_LIVER_DISEASE_YN",
-  "INC_HBP_YN",
-  "INC_NEURO_YN",
-  "INC_PULMO_DISEASE_YN",
-  "INC_DIABETES_YN",
-  "INC_ASTHMA_YN",
-  "INC_NEOPLASM_YN",
-  "INC_KIDNEY_DISEASE_YN",
-  "INC_IMMUNOSUPPR_YN",
-  "INC_HIV_YN",
-  # Pre-ICU admission
-  "ICU_ADM_DIAG_RAD",
-  "INC_LOS_PRIOR_ADM_INT",
-  "ICU_RESP_SUPPORT_YN",
-  "ICU_SUPP_TYPE_RAD",
-  "ICU_WHITE_CELL_INT", 
-  "ICU_NEUTRO_INT",
-  "ICU_FERRITINE_INT", # CRF -Ferritin recorded as mg/L 
-  "ICU_DIMERS_INT",
-  "ICU_CRP_INT",
-  "ICU_PRO_CALCIT_DEC",
-  "ICU_PLATELETS_INT",
-  "ICU_LYMPH_DEC",
-  # ICU medications
-  "ICU_ANTIVIRALS_YN",
-  "INF_ANTIBIO_YN",
-  # Corticosteroids
-  "ICU_CORTICO_DURATION_INT",
-  "ICU_CORTICO_INTERV_INT",
-  "ICU_CORTICO_INDICATION_RAD",
-  "INF_AT_ADMISSION_YN",
-  "INF_DURING_ICU_YN",
-       # "INF_SEVERITY", CRF indicates this is only if developed infection during ICU 
-  # During ICU
-  "ICU_SUP_WHITE_CELL_INT",
-  "ICU_SUP_NEUTRO_INT",
-  "ICU_SUP_LYMPH",
-  "ICU_SUP_FERRITINE_DEC",
-  "COAG_DIMERS_INT",
-  "COAG_PLATELETS_INT",
-  "ICU_ANTIVIRALS_YN",	
-  "ICU_ANTIVIRALS_RAD", # contains Lopinavir/Ritonavir /Remdesivir etc. 
-  "ICU_OTHER_ANTIVIRALS_RAD", # contains Convalescent plasma/Tocilizumab / Anakinra / Interferon alpha / Interferon beta
-  "ICU_ANTIMALARIAL_YN",
-  "ICU_CLIN_TRIAL_YN",
-  # Respiratory support
-  "RESP_PRONE_YN",
-  "RESP_ECMO_YN",
-  "RESP_NEUROM_BLOC_YN",
-  "RESP_INTUBATED_YN",
-  "RESP_INTUB_DAYS_AFT_ADM_INT", # DAYS FROM ICU ADMISSION TO INTUBATION
-  "RESP_DURATION_INV_VENT_INT", # DURATION OF VENTILATION
-  # Outcomes
-  "OUTCOME_LD",
-  "OUT_ICU_DURATION_INT",
-  "OUT_HOSP_DURATION_INT",
-  "OUT_HOSP_DURATION_OVERALL_INT",
-  "OUT_DEAD_DURING_ICU_YN",
-  # Secondary outcomes
-  "ICU_RRT_DIAL_YN",
-  "ICU_INOTROPES_YN",
-  "RESP_INV_VENT_YN",
-  "RESP_NI_VENT_YN",
-  "COAG_THROMBO_COMPLICATION",
-  "ventilation_severity"
-)
 
 ######################################################## Ensure format of data is correct ########################################################
 
@@ -168,6 +87,10 @@ UNITE_2020_corrected <- UNITE_2020_corrected |>
     ICU_CORTICO_ICU_INITIATION_PRIOR_ADMISSION_ICU_YN = ifelse(ICU_CORTICO_INTERV_INT <= INC_LOS_PRIOR_ADM_INT, 1, 0), # corticoids started prior to icu
     ICU_CORTICO_ICU_INITIATION_DURING_ADMISSION_ICU_YN = ifelse( INC_LOS_PRIOR_ADM_INT <= ICU_CORTICO_INTERV_INT, 1, 0) # corticoids started during icu
   )
+
+UNITE_2020_corrected <- UNITE_2020_corrected |>
+  mutate(ICU_TRACHEOS_YN = ifelse(ICU_TRACHEOS_YN == "Before this admission", "Yes", "No"))
+
 
 # how many do not have admission to ICU and admission to corticoid information and receive steroids
 #table(ifelse(is.na(UNITE_2020_corrected$ICU_CORTICO_ICU_INITIATION_AT_ADMISSION_YN) &
@@ -204,8 +127,6 @@ UNITE_2020_corrected <- UNITE_2020_corrected |>
   mutate(ICU_OTHER_ANTIVIRALS_RAD = ifelse(is.na(ICU_OTHER_ANTIVIRALS_RAD), "None", ICU_OTHER_ANTIVIRALS_RAD)) |>
   mutate(ICU_ANTIVIRALS_RAD = ifelse(is.na(ICU_ANTIVIRALS_RAD), "None", ICU_ANTIVIRALS_RAD))
 
-# Save the processed data
-write.csv(UNITE_2020_corrected, "data/processed/UNITE_2020_corrected_processed.csv", row.names = FALSE)
 
 # missingess in ICU_SUPP_TYPE_RAD
  UNITE_2020_corrected <- UNITE_2020_corrected |> 
@@ -261,3 +182,168 @@ UNITE_2020_corrected<- UNITE_2020_corrected %>% mutate(comorbidity_score = cardi
 
 UNITE_2020_corrected <- UNITE_2020_corrected %>%
   mutate(neutrophil_lymphocyte_ratio = ifelse(ICU_LYMPH_DEC == 0, NA, ICU_NEUTRO_INT / ICU_LYMPH_DEC))
+
+# convert ICU_ATELECTASIS_YN, ICU_PRESSURE_FAC_YN , ICU_PRESSURE_OTH_YN,  ICU_OBSTRUCTION_YN to boolean from strings
+UNITE_2020_corrected <- UNITE_2020_corrected %>%
+  mutate(
+    ICU_ATELECTASIS_YN = case_when(
+      tolower(ICU_ATELECTASIS_YN) == "true" ~ TRUE,
+      tolower(ICU_ATELECTASIS_YN) == "false" ~ FALSE,
+      TRUE ~ NA
+    ),
+    ICU_PRESSURE_FAC_YN = case_when(
+      tolower(ICU_PRESSURE_FAC_YN) == "true" ~ TRUE,
+      tolower(ICU_PRESSURE_FAC_YN) == "false" ~ FALSE,
+      TRUE ~ NA
+    ),
+    ICU_PRESSURE_OTH_YN = case_when(
+      tolower(ICU_PRESSURE_OTH_YN) == "true" ~ TRUE,
+      tolower(ICU_PRESSURE_OTH_YN) == "false" ~ FALSE,
+      TRUE ~ NA
+    ),
+    ICU_OBSTRUCTION_YN = case_when(
+      tolower(ICU_OBSTRUCTION_YN) == "true" ~ TRUE,
+      tolower(ICU_OBSTRUCTION_YN) == "false" ~ FALSE,
+      TRUE ~ NA
+    )
+  )
+
+
+# remove unessasary variables 
+
+vars_to_remove <- c(
+  #Related to the glucocorticoids 
+  "ICU_CORTICO_INDICATION_SHOCK",
+  "ICU_CORTICO_INDICATION_HYPERINFLAMMATION",
+  "ICU_CORTICO_INDICATION_PNEUMONITIS",
+  "ICU_CORTICO_INDICATION_PRE_EXISTING_CONDITION",
+  "ICU_CORTICO_INDICATION_OTHER",
+  "ICU_CORTICO_ICU_INITIATION_AT_ADMISSION_YN",
+  "ICU_CORTICO_ICU_INITIATION_PRIOR_ADMISSION_ICU_YN",
+  "ICU_CORTICO_ICU_INITIATION_DURING_ADMISSION_ICU_YN",
+  "ICU_CORTICO_DURATION_INT",
+  "ICU_CORTICO_INTERV_INT",
+
+  # comorbidity dummy variables
+  "cardiac_d", "liver_d", "neuro_d", "diabetes_d", "kidney_d", "htn_d",
+  "asthma_d", "resp_d", "immunosup_d", "hiv_d",
+
+  #ID variables 
+  "NEW_SUBJECT_ID", "NEW_CENTRE_ID", "NEW_PATIENT_ID", "NEW_COUNTRY_ID", "Iteration",
+  "INC_CRIT1_YN", "INC_CRIT2_YN", "INC_CRIT3_YN", "INC_CRIT4_YN", "DURATION_INC_CRIT4_YN",
+  "INC_PREGNANT_YN","INC_HELTH_WORK_YN", "DURATION_LOSINC_HELTH_WORK_YN",
+
+  #superceded by other variables
+  "INC_HEIGHT_INT", "INC_WEIGHT_INT",
+
+  #Labs during ICU stay 
+  "ICU_SUP_WHITE_CELL_INT", "ICU_SUP_NEUTRO_INT", "ICU_SUP_LYMPH", "ICU_SUP_FERRITINE_DEC",
+  "COAG_DIMERS_INT", "COAG_PLATELETS_INT", "COAG_ANTIPLAT_DOSE_TXT",
+
+  #Coagulation variables to exclude 
+  "COAG_DVT_DOSE_TXT", "COAG_LIFETHREAT_HEMO_YN", "COAG_TRANSF_NB_INT", "NEW_COAG_DVT_DAILY_DOSE", "INF_WITHOUT_ANTIMIC_INT",
+
+  # variables for ventilation parameters
+   "RESP_TIDAL_INT",
+  "RESP_PEEP_INT",
+  "RESP_FIO2_INT",
+  "RESP_PF_RATIO_INT",
+  "RESP_PACO2_INT",
+  "RESP_DRIV_PRESS_INT",
+  "RESP_PRONE_INTUB_INT",
+  "RESP_PRONE_NOTINTUB_INT",
+
+
+  #Outcomes for exclusion 
+  "OUTCOME_LD_OTHER", "OUTCOME_LD_TRANSFERRED", "OUTCOME_LD_DISCHARGED", "OUT_HOSP_DURATION_OVERALL_INT",
+  "ICU_ADM_DIAG_RAD", "ICU_ADM_DIAG_YN", "ICU_ANTIVIRALS_RAD", "OUTCOME_LD",
+  "ICU_OTHER_ANTIVIRALS_RAD", "INC_HIV_YN", "ICU_SUPP_TYPE_RAD", "INC_DIABETES_YN",
+  "OUTCOME_LD_DEATH", "OUT_HOSP_DURATION_INT", "OUT_ICU_DURATION_INT",
+  "ICU_CRP_RAD50", "ICU_CRP_RAD",
+  "INC_HEIGHT", "ICU_PRESSURE_FAC_YN", "ICU_TEMPERATURE_DEC", "RESP_INTUBATED_YNTRUE",
+
+  # not suitable for modeling
+  "ICU_TRACHEO_METHOD_RAD",
+  "INF_ANTIFUNG4_INT",
+  "INF_ANTIBIO1_INT",
+  "INF_ANTIBIO2_INT",
+
+  # infection parameters
+  "INF_PULMO_YN",
+  "INF_RESPIR_YN",
+  "INF_ABDO_YN",
+  "INF_BACTEREMIA_YN",
+  "INF_URINARY_YN",
+  "INF_CNS_YN",
+  "INF_OTHER_YN",
+  "INF_CLABSI_YN",
+  "INF_MDR_PATHO_YN",
+
+  # irrelevant
+  "REH_MOBIL_72H_YN",
+  "REH_MOBIL_VENT_72H_YN"
+)
+
+UNITE_2020_corrected <- UNITE_2020_corrected[ , 
+    ! names(UNITE_2020_corrected) %in% vars_to_remove
+  ]
+
+# exclude any variable with > 25% missingness
+  missingness <- colMeans(is.na(UNITE_2020_corrected)) > 0.25
+  vars_to_remove <- c(vars_to_remove, names(missingness[missingness]))
+
+UNITE_2020_corrected <-
+  UNITE_2020_corrected[ , 
+    ! names(UNITE_2020_corrected) %in% vars_to_remove
+  ]
+
+#exclude any variable with "CRIT"
+vars_to_remove <- c(vars_to_remove, grep("CRIT", names(UNITE_2020_corrected), value = TRUE))
+
+#exclude variables with "COAG_"
+vars_to_remove <- c(vars_to_remove, grep("COAG_", names(UNITE_2020_corrected), value = TRUE))
+
+#exclude variables with "COAG_BLEED_"
+vars_to_remove <- c(vars_to_remove, grep("COAG_BLEED_", names(UNITE_2020_corrected), value = TRUE))
+
+#remove variables which end in "_UNK"
+vars_to_remove <- c(vars_to_remove, grep("_UNK$", names(UNITE_2020_corrected), value = TRUE))
+
+
+vars_to_remove <- c(vars_to_remove, grep("ICU_THROMBO", names(UNITE_2020_corrected), value = TRUE))
+
+# exclude any variable with "RAD"
+#rad_vars <- grep("RAD", names(UNITE_2020_corrected), value = TRUE)
+#vars_to_remove <- c(vars_to_remove, rad_vars)
+
+
+UNITE_2020_corrected <-
+  UNITE_2020_corrected[ , 
+    ! names(UNITE_2020_corrected) %in% vars_to_remove
+  ]
+
+
+print("data cleaned")
+
+
+
+#####################################  PRODUCE categories of CRP #####################################
+
+UNITE_2020_corrected <- UNITE_2020_corrected %>%
+  mutate(
+    ICU_CRP_CATEGORY = case_when(
+      ICU_CRP_INT < 100 ~ "Low",
+      ICU_CRP_INT >= 100 & ICU_CRP_INT < 200 ~ "Moderate",
+      ICU_CRP_INT >= 200 & ICU_CRP_INT < 300 ~ "High",
+      ICU_CRP_INT >= 300 ~ "Very High",
+      TRUE ~ "Unknown"
+    )
+  )
+
+
+#test and split data using caret
+library(caret)  
+set.seed(123)  # For reproducibility
+train_indices <- createDataPartition(UNITE_2020_corrected$OUT_DEAD_DURING_ICU_YN, p = 0.8, list = FALSE)
+train_data <- UNITE_2020_corrected[train_indices, ]
+test_data <- UNITE_2020_corrected[-train_indices, ]

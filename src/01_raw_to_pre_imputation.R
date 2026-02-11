@@ -5,9 +5,6 @@ library(tidyverse)
 library(readr)
 library(gtsummary)
 
-#set working directory 
-setwd("C:/Users/brownmq/OneDrive - University Hospital Southampton NHS Foundation Trust/Documents/R/UNITE COVID data analysis/UNITE COVID data analysis")
-
 # Loading data for analysis 
 UNITE_2020_corrected = read.csv("data/original/UNITE_2020_corrected.csv", header=TRUE)
 UNITE_2020_corrected = UNITE_2020_corrected %>% mutate(wave = 1)
@@ -258,7 +255,7 @@ vars_to_remove <- c(
 
   #Outcomes for exclusion 
   "OUTCOME_LD_OTHER", "OUTCOME_LD_TRANSFERRED", "OUTCOME_LD_DISCHARGED", "OUT_HOSP_DURATION_OVERALL_INT",
-  "ICU_ADM_DIAG_RAD", "ICU_CORTICO_INDICATION_RAD", "ICU_ANTIVIRALS_RAD", "OUTCOME_LD",
+  "ICU_ADM_DIAG_RAD", "ICU_ADM_DIAG_YN", "ICU_CORTICO_INDICATION_RAD", "ICU_ANTIVIRALS_RAD", "OUTCOME_LD",
   "ICU_OTHER_ANTIVIRALS_RAD", "INC_HIV_YN", "ICU_SUPP_TYPE_RAD", "INC_DIABETES_YN",
   "OUTCOME_LD_DEATH", "OUT_HOSP_DURATION_INT", "OUT_ICU_DURATION_INT",
   "ICU_CRP_RAD50", "ICU_CRP_RAD",
@@ -271,7 +268,7 @@ vars_to_remove <- c(
   "INF_ANTIBIO2_INT",
 
   # infection parameters
-    "INF_PULMO_YN",
+  "INF_PULMO_YN",
   "INF_RESPIR_YN",
   "INF_ABDO_YN",
   "INF_BACTEREMIA_YN",
@@ -284,9 +281,6 @@ vars_to_remove <- c(
   # irrelevant
   "REH_MOBIL_72H_YN",
   "REH_MOBIL_VENT_72H_YN"
-
-
-
 )
 
 UNITE_2020_corrected <- UNITE_2020_corrected[ , 
@@ -302,14 +296,10 @@ UNITE_2020_corrected <-
     ! names(UNITE_2020_corrected) %in% vars_to_remove
   ]
 
-# exclude any variable with "RAD"
-rad_vars <- grep("RAD", names(UNITE_2020_corrected), value = TRUE)
-vars_to_remove <- c(vars_to_remove, rad_vars)
-
 #exclude any variable with "CRIT"
 vars_to_remove <- c(vars_to_remove, grep("CRIT", names(UNITE_2020_corrected), value = TRUE))
 
-#exclude variables with "COAG_"
+#exclude variables with "COAG_" except INC_ANTOCOAG_YN
 vars_to_remove <- c(vars_to_remove, grep("COAG_", names(UNITE_2020_corrected), value = TRUE))
 
 #exclude variables with "COAG_BLEED_"
@@ -318,15 +308,20 @@ vars_to_remove <- c(vars_to_remove, grep("COAG_BLEED_", names(UNITE_2020_correct
 #remove variables which end in "_UNK"
 vars_to_remove <- c(vars_to_remove, grep("_UNK$", names(UNITE_2020_corrected), value = TRUE))
 
-UNITE_2020_corrected <-
-  UNITE_2020_corrected[ , 
-    ! names(UNITE_2020_corrected) %in% vars_to_remove
-  ]
+# exclude any variable with "RAD"
+#rad_vars <- grep("RAD", names(UNITE_2020_corrected), value = TRUE)
+#vars_to_remove <- c(vars_to_remove, rad_vars)
+
+#remove INC_ANTOCOAG_YN from vars_to_remove
+vars_to_remove <- setdiff(vars_to_remove, "INC_ANTOCOAG_YN")
+
+
 
 UNITE_2020_corrected <-
   UNITE_2020_corrected[ , 
     ! names(UNITE_2020_corrected) %in% vars_to_remove
   ]
+
 
 print("data cleaned")
 

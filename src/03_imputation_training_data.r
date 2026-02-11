@@ -1,9 +1,6 @@
 #Data analysis for the the UNTIE COVID study - inflammatory phenotypes stratification and corticosteroid response
 # Exploration of missingness
 
-#set working directory 
-setwd("C:/Users/brownmq/OneDrive - University Hospital Southampton NHS Foundation Trust/Documents/R/UNITE COVID data analysis/UNITE COVID data analysis")
-
 # Run 01_raw_to_pre_imputation.R to process the data
 source("src/01_raw_to_pre_imputation.R")
 
@@ -14,32 +11,8 @@ library(miceadds)
 library(future.apply) # parrallelisation of MICE 
 library(naniar) #visualisation of missingness
 library(caret) # For colinearity detection
-library(mixgb) # mi with xgboost
 library(MASS) # backwards step AIC 
 library(caret)
-
-### columns from univariable analysis 
-vars <- c(
-  "NEW_SITE_ID", "INC_AGE_INT", "INC_LOS_PRIOR_ADM_INT", "INC_INTERVAL_HOSPIT_INT",
-  "INC_ADM_SURGE_BED_YN", "INC_CARDIAC_DISEASE_YN", "INC_LIVER_DISEASE_YN", "INC_HBP_YN",
-  "INC_NEURO_YN", "INC_PULMO_DISEASE_YN", "INC_ASTHMA_YN", "INC_NEOPLASM_YN",
-  "INC_KIDNEY_DISEASE_YN", "INC_IMMUNOSUPPR_YN", "INC_ACE_INHIB_YN", "INC_ANGIO_II_YN",
-  "INC_ANTIPLAT_YN", "ICU_RESP_SUPPORT_YN", "ICU_WHITE_CELL_INT", "ICU_NEUTRO_INT",
-  "ICU_CRP_INT", "ICU_PLATELETS_INT", "ICU_CARDIAC_THERAPY_YN", "ICU_SEPSIS_YN",
-  "ICU_STRESS_MYOC_YN", "ICU_MYOCARDITIS_YN", "ICU_PERICARD_YN", "ICU_PNEUMOTHORAX_YN",
-  "ICU_ATELECTASIS_YN", "ICU_DELIRIUM_YN", "ICU_PRESSURE_OTH_YN", "ICU_KIDNEY_INJ_YN",
-  "ICU_OBSTRUCTION_YN", "ICU_CORTICO_YN", "ICU_CLIN_TRIAL_YN", "ICU_SEDATION_YN",
-  "ICU_SEDAT_DURATION_INT", "ICU_RRT_DIAL_YN", "ICU_BLOOD_PURIF_YN", "ICU_INOTROPES_YN",
-  "ICU_TRACHEOS_YN", "RESP_INTUBATED_YN", "RESP_INTUBATED_ICU_STAY_YN", "RESP_NI_VENT_YN",
-  "RESP_HFNC_YN", "RESP_INV_VENT_YN", "RESP_DURATION_INV_VENT_INT", "RESP_ECMO_YN",
-  "RESP_PRONE_YN", "RESP_NEUROM_BLOC_YN", "RESP_VENT_ROUTINE_YN", "INF_ANTIBIO_YN",
-  "INF_ANTIFUNG_YN", "INF_AT_ADMISSION_YN", "INF_DURING_ICU_YN", "NEW_BMI",
-  "wave", "ventilation_severity", "INC_DIABETES1_YN", "comorbidity_score",
-  "neutrophil_lymphocyte_ratio", "ICU_CRP_CATEGORY", "OUT_DEAD_DURING_ICU_YN"
-)
-
-# Subset the training data to only include columns identified from univariable analysis
-Preimputation_train_data_muitltivariable = train_data |> dplyr::select(all_of(vars))
 
 # Visualise missingness matrix
 vis_miss(train_data)
@@ -84,7 +57,7 @@ ggsave("figures/missing_preimputation.png", plot = missing_preimputation , dpi =
 
 ################################################### IMPUTATION ###################################################
 
-train_data_imputation = futuremice(Preimputation_train_data_muitltivariable, m=5, n.cores=8 ) 
+train_data_imputation = futuremice(train_data, m=5)
 print("Imputation completed of the training data set")
 
 # Create age categories and convert back to mids object
@@ -109,14 +82,11 @@ modified_list <- lapply(1:train_data_imputation$m, function(i) {
 library(miceadds)
 train_data_imputation <- datlist2mids(modified_list)
 
-
-
-
-
 print("Age groups created and integrated into train_data_imputation mids object")
 
 
 ################################################### POST IMPUTATION ASSSESSMENT ###################################################
+
 ### Diagnostic plots of imputed method
 
 # Plot convergence for all imputed variables

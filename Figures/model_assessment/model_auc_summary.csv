@@ -1,0 +1,5 @@
+"Model","AUC","AUC_Lower95","AUC_Upper95"
+"Cheating",0.8112,0.7883,0.8342
+"Admission",0.7173,0.6901,0.7446
+"Admission_no_CRP",0.717,0.6897,0.7442
+"Simple_CRPxCortico",0.5182,0.4861,0.5503

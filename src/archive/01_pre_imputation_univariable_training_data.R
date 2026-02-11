@@ -10,8 +10,6 @@ library(buildmer)
 #detach("package:gtsummary4mice", character.only = TRUE)
 
 #set working directory 
-setwd("C:/Users/brownmq/OneDrive - University Hospital Southampton NHS Foundation Trust/Documents/R/UNITE COVID data analysis/UNITE COVID data analysis")
-
 source("src/01_raw_to_pre_imputation.R")
 
 univariable_training_output <- train_data %>%
@@ -21,7 +19,8 @@ univariable_training_output <- train_data %>%
     methods.args = list(family = binomial),
     exponentiate = TRUE
   )
-  
+print("Univariable analysis complete")
+
 # Extract P<0.2
 univariable_training_output <- univariable_training_output$table_body %>%
   filter(p.value < 0.2) %>%

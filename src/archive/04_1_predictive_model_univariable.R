@@ -6,7 +6,7 @@ library(broom)
 
 
 # Source the data preparation script to get processed data
-source("C:/Users/brownmq/OneDrive - University Hospital Southampton NHS Foundation Trust/Documents/R/UNITE COVID data analysis/UNITE COVID data analysis/src/01_raw_to_pre_imputation.R")
+source("src/01_raw_to_pre_imputation.R")
 
 #test and split data using caret
 library(caret)  
